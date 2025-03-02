@@ -1,36 +1,82 @@
-import React from "react";
-import {
-  StyleSheet,
-  View,
-  FlatList,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import React, { useReducer, useEffect } from "react";
+import { StyleSheet, View, FlatList, Text, TouchableOpacity } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const recipes = [
-  { id: "1", title: "Spaghetti Bolognese" },
-  { id: "2", title: "Ensalada César" },
-  { id: "3", title: "Tacos al Pastor" },
-];
+const initialState = [];
 
-export default function HomeScreen({ navigation }) {
+function recipesReducer(state, action) {
+  switch (action.type) {
+    case "ADD_RECIPE":
+      const updatedRecipes = [...state, action.payload]; // Agregar nueva receta sin perder las anteriores
+      AsyncStorage.setItem("recipes", JSON.stringify(updatedRecipes)); // Guardar en AsyncStorage
+      return updatedRecipes;
+
+    case "SET_RECIPES":
+      return action.payload;
+
+    default:
+      return state;
+  }
+}
+
+export default function HomeScreen({ navigation, route }) {
+  const [recipes, dispatch] = useReducer(recipesReducer, initialState);
+
+  useEffect(() => {
+    const loadRecipes = async () => {
+      try {
+        const storedRecipes = await AsyncStorage.getItem("recipes");
+        if (storedRecipes) {
+          dispatch({ type: "SET_RECIPES", payload: JSON.parse(storedRecipes) });
+        }
+      } catch (error) {
+        console.error("Failed to load recipes from storage", error);
+      }
+    };
+
+    loadRecipes();
+  }, []);
+
+  useEffect(() => {
+    const addRecipe = async () => {
+      if (route.params?.newRecipe) {
+        try {
+          const storedRecipes = await AsyncStorage.getItem("recipes");
+          const currentRecipes = storedRecipes ? JSON.parse(storedRecipes) : [];
+          const updatedRecipes = [...currentRecipes, route.params.newRecipe];
+
+          await AsyncStorage.setItem("recipes", JSON.stringify(updatedRecipes));
+          dispatch({ type: "SET_RECIPES", payload: updatedRecipes });
+
+          navigation.setParams({ newRecipe: null }); // Evita que se repita la adición
+        } catch (error) {
+          console.error("Failed to save recipe", error);
+        }
+      }
+    };
+
+    addRecipe();
+  }, [route.params?.newRecipe]);
+
+  console.log("Recipes:", recipes);
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Recetas</Text>
+
       <FlatList
         data={recipes}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.recipeItem}
-            onPress={() =>
-              navigation.navigate("RecipeDetail", { recipe: item })
-            }
+            onPress={() => navigation.navigate("RecipeDetail", { recipe: item })}
           >
             <Text style={styles.recipeTitle}>{item.title}</Text>
           </TouchableOpacity>
         )}
       />
+
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate("AddRecipe")}

@@ -10,13 +10,19 @@ import {
 export default function AddRecipeScreen({ navigation }) {
   const [recipeName, setRecipeName] = useState("");
 
+  const generateId = () => {
+    return Math.random().toString(36).substr(2, 9);
+  };
+
   const handleAddRecipe = () => {
     if (recipeName.trim()) {
-      alert("Receta añadida con éxito!");
-
-      navigation.navigate("HomeScreen", {
-        recipies: [...{ title: recipeName }],
-      });
+      const newRecipe = {
+        id: generateId(), // Genera un ID único para cada receta
+        title: recipeName.trim(),
+      };
+      console.log("New Recipe:", newRecipe); // Verifica el objeto newRecipe
+      navigation.navigate("Home", { newRecipe }); // Pasa el objeto de receta
+      setRecipeName(""); // Limpia el input después de agregar
     } else {
       alert("Por favor ingrese un nombre válido.");
     }
@@ -32,6 +38,9 @@ export default function AddRecipeScreen({ navigation }) {
       />
       <TouchableOpacity style={styles.button} onPress={handleAddRecipe}>
         <Text style={styles.buttonText}>Agregar Receta</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
+        <Text style={styles.buttonText}>Volver</Text>
       </TouchableOpacity>
     </View>
   );

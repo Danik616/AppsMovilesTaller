@@ -48,7 +48,7 @@ export default function LoginScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 16 },
+  container: { backgroundColor: "#ED9277", flex: 1, justifyContent: "center", padding: 16 },
   title: {
     fontSize: 24,
     fontWeight: "bold",
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 8,
   },
-  button: { backgroundColor: "#1976d2", padding: 12, borderRadius: 4 },
+  button: { backgroundColor: "#ffa500", padding: 12, borderRadius: 4 },
   buttonText: { color: "white", textAlign: "center", fontSize: 16 },
   linkText: { color: "#1976d2", textAlign: "center", marginTop: 16 },
 });

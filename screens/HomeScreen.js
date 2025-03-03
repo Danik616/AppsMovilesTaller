@@ -22,20 +22,30 @@ function recipesReducer(state, action) {
 export default function HomeScreen({ navigation, route }) {
   const [recipes, dispatch] = useReducer(recipesReducer, initialState);
 
+  //--------------------------------------------------------------------------------
   useEffect(() => {
-    const loadRecipes = async () => {
+    const reloadRecipes = async () => {
       try {
+        console.log("🔄 Recargando recetas desde AsyncStorage...");
         const storedRecipes = await AsyncStorage.getItem("recipes");
         if (storedRecipes) {
           dispatch({ type: "SET_RECIPES", payload: JSON.parse(storedRecipes) });
         }
       } catch (error) {
-        console.error("Failed to load recipes from storage", error);
+        console.error("Error al recargar recetas:", error);
       }
     };
-
-    loadRecipes();
-  }, []);
+  
+    // Se ejecuta cada vez que `Home` recibe el foco
+    const unsubscribe = navigation.addListener("focus", () => {
+      reloadRecipes();
+    });
+  
+    return unsubscribe;
+  }, [navigation]);
+  
+  
+  
 
   useEffect(() => {
     const addRecipe = async () => {
@@ -59,7 +69,7 @@ export default function HomeScreen({ navigation, route }) {
   }, [route.params?.newRecipe]);
 
   console.log("Recipes:", recipes);
-  
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Recetas</Text>
@@ -88,7 +98,7 @@ export default function HomeScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
+  container: { backgroundColor: "#ED9277",flex: 1, padding: 16 },
   title: {
     fontSize: 24,
     fontWeight: "bold",
@@ -97,13 +107,13 @@ const styles = StyleSheet.create({
   },
   recipeItem: {
     padding: 16,
-    backgroundColor: "#ddd",
+    backgroundColor: "#e2c456",
     marginBottom: 10,
     borderRadius: 5,
   },
   recipeTitle: { fontSize: 18 },
   addButton: {
-    backgroundColor: "#1976d2",
+    backgroundColor: "#ffa500",
     padding: 12,
     borderRadius: 4,
     marginTop: 20,

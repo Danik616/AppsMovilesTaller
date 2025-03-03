@@ -47,7 +47,7 @@ export default function AddRecipeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, justifyContent: "center" },
+  container: { backgroundColor: "#ED9277", flex: 1, padding: 16, justifyContent: "center" },
   input: {
     height: 40,
     borderColor: "gray",
@@ -55,6 +55,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 8,
   },
-  button: { backgroundColor: "#1976d2", padding: 12, borderRadius: 4 },
+  button: { backgroundColor: "#ffa500", padding: 12, borderRadius: 4 },
   buttonText: { color: "white", textAlign: "center", fontSize: 16 },
 });

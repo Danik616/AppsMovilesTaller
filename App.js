@@ -1,29 +1,51 @@
-import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
-import LoginScreen from "./screens/LoginScreen";
-import HomeScreen from "./screens/HomeScreen";
-import RecipeDetailScreen from "./screens/RecipeDetailScreen";
-import AddRecipeScreen from "./screens/AddRecipeScreen";
+import { NavigationContainer } from '@react-navigation/native';
+import { useState } from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
+import { StyleSheet, SafeAreaView, StatusBar } from 'react-native';
+import LoginScreen from './screens/LoginScreen';
+import MainNavigator from './screens/navigation/MainNavigation';
+import HomeScreen from './screens/HomeScreen';
+import RecipeDetailScreen from './screens/RecipeDetailScreen';
+import AddRecipeScreen from './screens/AddRecipeScreen';
 
 const Stack = createStackNavigator();
 
 export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+
+  const handleLogin = (email) => {
+    // Mock successful login
+    setUser({ email });
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setIsLoggedIn(false);
+  };
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
-        <Stack.Screen name="AddRecipe" component={AddRecipeScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {!isLoggedIn ? (
+            <Stack.Screen name="Login">{(props) => <LoginScreen {...props} onLogin={handleLogin} />}</Stack.Screen>
+          ) : (
+            <Stack.Screen name="Main">
+              {(props) => <MainNavigator {...props} email={user?.email} onLogout={handleLogout} />}
+            </Stack.Screen>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
+});

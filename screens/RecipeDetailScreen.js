@@ -192,8 +192,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  buttonContainer : {
-    marginTop: 'auto'
+  buttonContainer: {
+    marginTop: 'auto',
   },
   image: {
     width: '100%',

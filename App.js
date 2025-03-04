@@ -4,9 +4,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { StyleSheet, SafeAreaView, StatusBar } from 'react-native';
 import LoginScreen from './screens/LoginScreen';
 import MainNavigator from './screens/navigation/MainNavigation';
-import HomeScreen from './screens/HomeScreen';
-import RecipeDetailScreen from './screens/RecipeDetailScreen';
-import AddRecipeScreen from './screens/AddRecipeScreen';
 
 const Stack = createStackNavigator();
 
@@ -27,14 +24,22 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <StatusBar barStyle='dark-content' backgroundColor='#ffffff' />
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {!isLoggedIn ? (
-            <Stack.Screen name="Login">{(props) => <LoginScreen {...props} onLogin={handleLogin} />}</Stack.Screen>
+            <Stack.Screen name='Login'>
+              {(props) => <LoginScreen {...props} onLogin={handleLogin} />}
+            </Stack.Screen>
           ) : (
-            <Stack.Screen name="Main">
-              {(props) => <MainNavigator {...props} email={user?.email} onLogout={handleLogout} />}
+            <Stack.Screen name='Main'>
+              {(props) => (
+                <MainNavigator
+                  {...props}
+                  email={user?.email}
+                  onLogout={handleLogout}
+                />
+              )}
             </Stack.Screen>
           )}
         </Stack.Navigator>

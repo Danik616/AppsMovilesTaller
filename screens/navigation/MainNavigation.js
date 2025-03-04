@@ -63,7 +63,6 @@ function HomeTabs({ email, onLogout }) {
       >
         {() => onLogout()}
       </Tab.Screen>
-
     </Tab.Navigator>
   );
 }
@@ -87,7 +86,7 @@ export default function MainNavigator({ email, onLogout }) {
       />
 
       <Stack.Screen
-        name="RecipeDetail"
+        name='RecipeDetail'
         component={RecipeDetailScreen}
         options={{
           headerTitle: 'Detalles de la receta',

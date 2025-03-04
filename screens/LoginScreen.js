@@ -13,10 +13,10 @@ import {
 } from 'react-native';
 
 export default function LoginScreen({ onLogin }) {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [isLogin, setIsLogin] = useState(true)
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
 
   const handleLogin = () => {
     if (email === 'Admin' && password === '123456') {
@@ -28,29 +28,29 @@ export default function LoginScreen({ onLogin }) {
 
   function handleAuth() {
     if (!email || !password) {
-      Alert.alert("Error", "Please enter both email and password")
-      return
+      Alert.alert('Error', 'Please enter both email and password');
+      return;
     }
 
     if (password.length < 6) {
-      Alert.alert("Error", "Password must be at least 6 characters")
-      return
+      Alert.alert('Error', 'Password must be at least 6 characters');
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     // Simulate API call
     setTimeout(() => {
-      setLoading(false)
+      setLoading(false);
       if (isLogin) {
         // In a real app, you would validate credentials against your backend
-        onLogin(email)
+        onLogin(email);
       } else {
         // In a real app, you would register the user in your backend
-        Alert.alert("Success", "Account created successfully!")
-        setIsLogin(true)
+        Alert.alert('Success', 'Account created successfully!');
+        setIsLogin(true);
       }
-    }, 1500)
+    }, 1500);
   }
 
   return (
@@ -60,16 +60,9 @@ export default function LoginScreen({ onLogin }) {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.headerContainer}>
-          <Image
-            source={{ uri: './assets/logo.png' }}
-            style={styles.logo}
-          />
-          <Text style={styles.title}>
-            Bienvenido
-          </Text>
-          <Text style={styles.subtitle}>
-            Inicia sesión para continuar
-          </Text>
+          <Image source={{ uri: './assets/logo.png' }} style={styles.logo} />
+          <Text style={styles.title}>Bienvenido</Text>
+          <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
         </View>
 
         <View style={styles.formContainer}>
@@ -102,9 +95,7 @@ export default function LoginScreen({ onLogin }) {
             {loading ? (
               <Text style={styles.buttonText}>Cargando...</Text>
             ) : (
-              <Text style={styles.buttonText}>
-                Iniciar sesión
-              </Text>
+              <Text style={styles.buttonText}>Iniciar sesión</Text>
             )}
           </TouchableOpacity>
 

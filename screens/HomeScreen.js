@@ -77,26 +77,35 @@ export default function HomeScreen({ navigation, route }) {
     <View style={styles.container}>
       <Text style={styles.title}>Recetas</Text>
 
-      <FlatList
-        data={recipes}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.recipeItem}
-            onPress={() =>
-              navigation.navigate('RecipeDetail', { recipe: item })
-            }
-          >
-            <Text style={styles.recipeTitle}>{item.title}</Text>
-          </TouchableOpacity>
-        )}
-      />
+      {recipes.length === 0 ? (
+        <Text style={styles.notFound}>No hay recetas, crea una!</Text>
+      ) : (
+        <FlatList
+          data={recipes}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.recipeItem}
+              onPress={() =>
+                navigation.navigate('RecipeDetail', { recipe: item })
+              }
+            >
+              <Text style={styles.recipeTitle}>{item.title}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { backgroundColor: '#ffffff', flex: 1, padding: 16 },
+  notFound: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -105,7 +114,9 @@ const styles = StyleSheet.create({
   },
   recipeItem: {
     padding: 16,
-    backgroundColor: '#e2c456',
+    backgroundColor: '#ffffff',
+    borderColor: '#6366F1',
+    borderWidth: 2,
     marginBottom: 10,
     borderRadius: 5,
   },

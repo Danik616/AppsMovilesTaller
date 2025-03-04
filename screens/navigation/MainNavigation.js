@@ -72,7 +72,7 @@ function HomeTabs({ email, onLogout }) {
 export default function MainNavigator({ email, onLogout }) {
   return (
     <Stack.Navigator>
-      <Stack.Screen name='HomeTab' options={{ headerShown: false }}>
+      <Stack.Screen name='Home' options={{ headerShown: false }}>
         {(props) => <HomeTabs {...props} email={email} onLogout={onLogout} />}
       </Stack.Screen>
 

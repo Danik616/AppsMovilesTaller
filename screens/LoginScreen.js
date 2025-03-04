@@ -110,7 +110,7 @@ export default function LoginScreen({ onLogin }) {
 
           <TouchableOpacity
             style={styles.switchContainer}
-            onPress={() => setIsLogin(!isLogin)}
+            // onPress={() => setIsLogin(!isLogin)}
           >
             <Text style={styles.switchText}>
               No tienes una cuenta? Registrate!

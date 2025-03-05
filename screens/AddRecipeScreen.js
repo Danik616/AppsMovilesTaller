@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
   TextInput,
   TouchableOpacity,
   Text,
-} from 'react-native';
+} from "react-native";
+import PropTypes from "prop-types";
 
 export default function AddRecipeScreen({ navigation }) {
-  const [recipeName, setRecipeName] = useState('');
+  const [recipeName, setRecipeName] = useState("");
 
   const generateId = () => {
-    return Math.random().toString(36).substr(2, 9);
+    return Math.random().toString(36).slice(2, 11);
   };
 
   const handleAddRecipe = () => {
@@ -20,12 +21,19 @@ export default function AddRecipeScreen({ navigation }) {
         id: generateId(), // Genera un ID único para cada receta
         title: recipeName.trim(),
       };
-      console.log('New Recipe:', newRecipe); // Verifica el objeto newRecipe
-      navigation.navigate('Home', { newRecipe }); // Pasa el objeto de receta
-      setRecipeName(''); // Limpia el input después de agregar
+      console.log("New Recipe:", newRecipe); // Verifica el objeto newRecipe
+      navigation.navigate("Home", { newRecipe }); // Pasa el objeto de receta
+      setRecipeName(""); // Limpia el input después de agregar
     } else {
-      alert('Por favor ingrese un nombre válido.');
+      alert("Por favor ingrese un nombre válido.");
     }
+  };
+
+  AddRecipeScreen.propTypes = {
+    navigation: PropTypes.shape({
+      navigate: PropTypes.func.isRequired,
+      goBack: PropTypes.func.isRequired,
+    }).isRequired,
   };
 
   return (
@@ -33,7 +41,7 @@ export default function AddRecipeScreen({ navigation }) {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder='Nombre de la Receta'
+          placeholder="Nombre de la Receta"
           value={recipeName}
           onChangeText={setRecipeName}
         />
@@ -55,33 +63,33 @@ export default function AddRecipeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     flex: 1,
     padding: 16,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   inputContainer: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: "#F3F4F6",
     borderRadius: 12,
     paddingHorizontal: 16,
     marginBottom: 16,
     height: 56,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   input: {
-    color: '#1F2937',
+    color: "#1F2937",
     fontSize: 16,
   },
   buttonContainer: {
-    marginTop: 'auto',
+    marginTop: "auto",
   },
   button: {
-    backgroundColor: '#6366F1',
+    backgroundColor: "#6366F1",
     borderRadius: 12,
     height: 56,
     marginTop: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
-  buttonText: { color: 'white', textAlign: 'center', fontSize: 16 },
+  buttonText: { color: "white", textAlign: "center", fontSize: 16 },
 });

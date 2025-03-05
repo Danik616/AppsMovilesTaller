@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,30 +10,24 @@ import {
   Platform,
   ScrollView,
   Image,
-} from 'react-native';
+} from "react-native";
+import icon from "../assets/icon.png";
+import PropTypes from "prop-types";
 
 export default function LoginScreen({ onLogin }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
 
-  const handleLogin = () => {
-    if (email === 'Admin' && password === '123456') {
-      navigation.navigate('Home');
-    } else {
-      Alert.alert('Error', 'Credenciales incorrectas');
-    }
-  };
-
   function handleAuth() {
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
+      Alert.alert("Error", "Please enter both email and password");
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+      Alert.alert("Error", "Password must be at least 6 characters");
       return;
     }
 
@@ -47,7 +41,7 @@ export default function LoginScreen({ onLogin }) {
         onLogin(email);
       } else {
         // In a real app, you would register the user in your backend
-        Alert.alert('Success', 'Account created successfully!');
+        Alert.alert("Success", "Account created successfully!");
         setIsLogin(true);
       }
     }, 1500);
@@ -55,12 +49,12 @@ export default function LoginScreen({ onLogin }) {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.headerContainer}>
-          <Image source={{ uri: './assets/logo.png' }} style={styles.logo} />
+          <Image source={icon} style={styles.logo} />
           <Text style={styles.title}>Bienvenido</Text>
           <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
         </View>
@@ -68,18 +62,18 @@ export default function LoginScreen({ onLogin }) {
         <View style={styles.formContainer}>
           <View style={styles.inputContainer}>
             <TextInput
-              placeholder='Correo electrónico'
+              placeholder="Correo electrónico"
               value={email}
               onChangeText={setEmail}
-              autoCapitalize='none'
-              keyboardType='email-address'
+              autoCapitalize="none"
+              keyboardType="email-address"
               style={styles.input}
             />
           </View>
 
           <View style={styles.inputContainer}>
             <TextInput
-              placeholder='Contraseña'
+              placeholder="Contraseña"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -113,18 +107,22 @@ export default function LoginScreen({ onLogin }) {
   );
 }
 
+LoginScreen.propTypes = {
+  onLogin: PropTypes.func.isRequired,
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
   },
   headerContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 40,
   },
   logo: {
@@ -134,49 +132,49 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: "bold",
+    color: "#1F2937",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6B7280',
-    textAlign: 'center',
+    color: "#6B7280",
+    textAlign: "center",
   },
   formContainer: {
-    width: '100%',
+    width: "100%",
   },
   inputContainer: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: "#F3F4F6",
     borderRadius: 12,
     paddingHorizontal: 16,
     marginBottom: 16,
     height: 56,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   input: {
-    color: '#1F2937',
+    color: "#1F2937",
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#6366F1',
+    backgroundColor: "#6366F1",
     borderRadius: 12,
     height: 56,
     marginTop: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    fontWeight: "bold",
+    color: "#FFFFFF",
   },
   switchContainer: {
     marginTop: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   switchText: {
-    color: '#6366F1',
+    color: "#6366F1",
     fontSize: 16,
   },
 });

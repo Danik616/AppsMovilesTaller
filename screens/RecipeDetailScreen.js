@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -6,15 +6,16 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker';
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
+import PropTypes from "prop-types";
 
 export default function RecipeDetailScreen({ route, navigation }) {
   const { recipe } = route.params;
   const [title, setTitle] = useState(recipe.title);
   const [description, setDescription] = useState(
-    recipe.description || 'Aquí irá la descripción y pasos de la receta.'
+    recipe.description || "Aquí irá la descripción y pasos de la receta."
   );
   const [image, setImage] = useState(recipe.image || null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -34,7 +35,7 @@ export default function RecipeDetailScreen({ route, navigation }) {
 
   const handleAddImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "image",
       allowsEditing: true,
       aspect: undefined,
       quality: 1,
@@ -49,7 +50,7 @@ export default function RecipeDetailScreen({ route, navigation }) {
 
   const saveRecipe = async (updatedRecipe) => {
     try {
-      const storedRecipes = await AsyncStorage.getItem('recipes');
+      const storedRecipes = await AsyncStorage.getItem("recipes");
       let recipes = storedRecipes ? JSON.parse(storedRecipes) : [];
 
       // 🔹 Buscar la receta por ID y actualizarla
@@ -57,26 +58,26 @@ export default function RecipeDetailScreen({ route, navigation }) {
         r.id === updatedRecipe.id ? updatedRecipe : r
       );
 
-      await AsyncStorage.setItem('recipes', JSON.stringify(recipes));
+      await AsyncStorage.setItem("recipes", JSON.stringify(recipes));
 
-      console.log('✅ Receta guardada correctamente:', updatedRecipe);
+      console.log("✅ Receta guardada correctamente:", updatedRecipe);
 
       // 🔹 Recarga la pantalla en lugar de regresar a Home
-      navigation.replace('RecipeDetail', { recipe: updatedRecipe });
+      navigation.replace("RecipeDetail", { recipe: updatedRecipe });
     } catch (error) {
-      console.error('❌ Error al guardar receta:', error);
+      console.error("❌ Error al guardar receta:", error);
     }
   };
 
   const handleDeleteRecipe = async () => {
     try {
-      const storedRecipes = await AsyncStorage.getItem('recipes');
+      const storedRecipes = await AsyncStorage.getItem("recipes");
       const recipes = storedRecipes ? JSON.parse(storedRecipes) : [];
       const updatedRecipes = recipes.filter((r) => r.id !== recipe.id);
-      await AsyncStorage.setItem('recipes', JSON.stringify(updatedRecipes));
-      navigation.navigate('Home', { updated: true }); // ✅ Se asegura de que Home sepa que se eliminó una receta
+      await AsyncStorage.setItem("recipes", JSON.stringify(updatedRecipes));
+      navigation.navigate("Home", { updated: true }); // ✅ Se asegura de que Home sepa que se eliminó una receta
     } catch (error) {
-      console.error('Failed to delete recipe', error);
+      console.error("Failed to delete recipe", error);
     }
   };
 
@@ -86,7 +87,7 @@ export default function RecipeDetailScreen({ route, navigation }) {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder='Nombre de la Receta'
+            placeholder="Nombre de la Receta"
             value={title}
             onChangeText={setTitle}
           />
@@ -101,7 +102,7 @@ export default function RecipeDetailScreen({ route, navigation }) {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder='Nombre de la Receta'
+            placeholder="Nombre de la Receta"
             value={description}
             onChangeText={setDescription}
           />
@@ -118,7 +119,7 @@ export default function RecipeDetailScreen({ route, navigation }) {
           }
         >
           <Text style={styles.buttonText}>
-            {isEditingTitle ? 'Guardar Título' : 'Editar Título'}
+            {isEditingTitle ? "Guardar Título" : "Editar Título"}
           </Text>
         </TouchableOpacity>
 
@@ -132,14 +133,14 @@ export default function RecipeDetailScreen({ route, navigation }) {
         >
           <Text style={styles.buttonText}>
             {isEditingDescription
-              ? 'Guardar Descripción'
-              : 'Editar Descripción'}
+              ? "Guardar Descripción"
+              : "Editar Descripción"}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={handleAddImage}>
           <Text style={styles.buttonText}>
-            {image ? 'Editar Foto' : 'Agregar Foto'}
+            {image ? "Editar Foto" : "Agregar Foto"}
           </Text>
         </TouchableOpacity>
 
@@ -154,53 +155,71 @@ export default function RecipeDetailScreen({ route, navigation }) {
   );
 }
 
+RecipeDetailScreen.propTypes = {
+  route: PropTypes.shape({
+    params: PropTypes.shape({
+      recipe: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        title: PropTypes.string.isRequired,
+        description: PropTypes.string,
+        image: PropTypes.string,
+      }).isRequired,
+    }).isRequired,
+  }).isRequired,
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+    goBack: PropTypes.func.isRequired,
+    replace: PropTypes.func.isRequired,
+  }).isRequired,
+};
+
 const styles = StyleSheet.create({
-  container: { backgroundColor: '#ffffff', flex: 1, padding: 16 },
+  container: { backgroundColor: "#ffffff", flex: 1, padding: 16 },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 12,
-    textAlign: 'center',
+    textAlign: "center",
   },
   description: { fontSize: 16, marginBottom: 12 },
   inputContainer: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: "#F3F4F6",
     borderRadius: 12,
     paddingHorizontal: 16,
     marginBottom: 16,
     height: 56,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   input: {
-    color: '#1F2937',
+    color: "#1F2937",
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#6366F1',
+    backgroundColor: "#6366F1",
     borderRadius: 12,
     height: 56,
     marginTop: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
-  buttonText: { color: 'white', textAlign: 'center', fontSize: 16 },
+  buttonText: { color: "white", textAlign: "center", fontSize: 16 },
   deleteButton: {
-    backgroundColor: 'red',
+    backgroundColor: "red",
     borderRadius: 12,
     height: 56,
     marginTop: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonContainer: {
-    marginTop: 'auto',
+    marginTop: "auto",
   },
   image: {
-    width: '100%',
+    width: "100%",
     height: undefined,
     aspectRatio: 1,
     marginBottom: 12,
     borderRadius: 4,
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
 });

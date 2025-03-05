@@ -26,26 +26,17 @@ function recipesReducer(state, action) {
   }
 }
 
+function addRecipeToState(state, newRecipe) {
+  const updatedRecipes = [...state, newRecipe];
+  AsyncStorage.setItem("recipes", JSON.stringify(updatedRecipes));
+  return updatedRecipes;
+}
+
 export default function HomeScreen({ navigation, route }) {
   const [recipes, dispatch] = useReducer(recipesReducer, initialState);
   const [isLoading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
-  const getCategories = async () => {
-    try {
-      const response = await fetch("https://www.themealdb.com/api/json/v1/1/categories.php");
-      const json = await response.json();
-      setData(json.categories);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getCategories();
-  }, []);
 
   useEffect(() => {
     const reloadRecipes = async () => {
@@ -67,11 +58,31 @@ export default function HomeScreen({ navigation, route }) {
     return unsubscribe;
   }, [navigation]);
 
+  useEffect(() => {
+    const addRecipe = async () => {
+      if (route.params?.newRecipe) {
+        try {
+          const storedRecipes = await AsyncStorage.getItem("recipes");
+          const currentRecipes = storedRecipes ? JSON.parse(storedRecipes) : [];
+          const updatedRecipes = [...currentRecipes, route.params.newRecipe];
+
+          await AsyncStorage.setItem("recipes", JSON.stringify(updatedRecipes));
+          dispatch({ type: "SET_RECIPES", payload: updatedRecipes });
+
+          navigation.setParams({ newRecipe: null }); // Evita que se repita la adición
+        } catch (error) {
+          console.error("Failed to save recipe", error);
+        }
+      }
+    };
+
+    addRecipe();
+  }, [route.params?.newRecipe]);
 
   console.log("Recipes:", recipes);
 
   const renderCategories = ({ item }) => (
-    <TouchableOpacity style={styles.recipeItem} onPress={() =>
+    <TouchableOpacity style={styles.container} onPress={() =>
       navigation.navigate("RecipeDetail", { recipe: item })
     }>
       <Text style={styles.recipeTitle}>{item.strCategory}</Text>
@@ -81,16 +92,24 @@ export default function HomeScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Categorias</Text>
+      <Text style={styles.title}>Recetas</Text>
 
-      {isLoading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+      {recipes.length === 0 ? (
+        <Text style={styles.notFound}>No hay recetas, crea una!</Text>
       ) : (
         <FlatList
-          data={data}
-          keyExtractor={(item) => item.idCategory}
-          renderItem={renderCategories}
-          contentContainerStyle={styles.listContainer}
+          data={recipes}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.recipeItem}
+              onPress={() =>
+                navigation.navigate("RecipeDetail", { recipe: item })
+              }
+            >
+              <Text style={styles.recipeTitle}>{item.title}</Text>
+            </TouchableOpacity>
+          )}
         />
       )}
     </View>

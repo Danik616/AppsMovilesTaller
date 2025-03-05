@@ -29,13 +29,6 @@ export default function AddRecipeScreen({ navigation }) {
     }
   };
 
-  AddRecipeScreen.propTypes = {
-    navigation: PropTypes.shape({
-      navigate: PropTypes.func.isRequired,
-      goBack: PropTypes.func.isRequired,
-    }).isRequired,
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
@@ -60,6 +53,13 @@ export default function AddRecipeScreen({ navigation }) {
     </View>
   );
 }
+
+AddRecipeScreen.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+    goBack: PropTypes.func.isRequired,
+  }).isRequired,
+};
 
 const styles = StyleSheet.create({
   container: {

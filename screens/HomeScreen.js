@@ -33,7 +33,9 @@ export default function HomeScreen({ navigation, route }) {
 
   const getCategories = async () => {
     try {
-      const response = await fetch("https://www.themealdb.com/api/json/v1/1/categories.php");
+      const response = await fetch(
+        "https://www.themealdb.com/api/json/v1/1/categories.php"
+      );
       const json = await response.json();
       setData(json.categories);
     } catch (error) {
@@ -67,13 +69,15 @@ export default function HomeScreen({ navigation, route }) {
     return unsubscribe;
   }, [navigation]);
 
-
   console.log("Recipes:", recipes);
 
   const renderCategories = ({ item }) => (
-    <TouchableOpacity style={styles.recipeItem} onPress={() =>
-      navigation.navigate("RecipeDetail", { recipe: item })
-    }>
+    <TouchableOpacity
+      style={styles.recipeItem}
+      onPress={() =>
+        navigation.navigate("CategoryDetail", { category: item.strCategory })
+      }
+    >
       <Text style={styles.recipeTitle}>{item.strCategory}</Text>
       <Image source={{ uri: item.strCategoryThumb }} style={styles.image} />
     </TouchableOpacity>

@@ -1,5 +1,6 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import CategoryDetailScreen from "../CategoryDetailScreen";
 import PropTypes from "prop-types";
 import React, { useEffect } from "react";
 import HomeScreen from "../HomeScreen";
@@ -87,6 +88,16 @@ export default function MainNavigator({ email, onLogout }) {
         component={AddRecipeScreen}
         options={{
           headerTitle: "Añadir receta",
+          headerBackTitle: "Atrás",
+          headerTintColor: "#6366F1",
+        }}
+      />
+
+      <Stack.Screen
+        name="CategoryDetail"
+        component={CategoryDetailScreen} // Nueva pantalla
+        options={{
+          headerTitle: "Recetas de Categoría",
           headerBackTitle: "Atrás",
           headerTintColor: "#6366F1",
         }}

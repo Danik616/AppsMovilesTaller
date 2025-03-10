@@ -10,11 +10,15 @@ import {
   Platform,
   ScrollView,
   Image,
+  SafeAreaView,
+  Dimensions,
 } from "react-native";
 import icon from "../assets/icon.png";
 import PropTypes from "prop-types";
 
-export default function LoginScreen({ onLogin }) {
+const windowWidth = Dimensions.get('window').width;
+
+export default function LoginScreen({ onLogin, navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,134 +52,219 @@ export default function LoginScreen({ onLogin }) {
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.headerContainer}>
-          <Image source={icon} style={styles.logo} />
-          <Text style={styles.title}>Bienvenido</Text>
-          <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
-        </View>
-
-        <View style={styles.formContainer}>
-          <View style={styles.inputContainer}>
-            <TextInput
-              placeholder="Correo electrónico"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              style={styles.input}
-            />
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardView}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.headerContainer}>
+            <View style={styles.logoContainer}>
+              <Image source={icon} style={styles.logo} />
+            </View>
+            <Text style={styles.title}>Bienvenido</Text>
+            <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
           </View>
 
-          <View style={styles.inputContainer}>
-            <TextInput
-              placeholder="Contraseña"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              style={styles.input}
-            />
+          <View style={styles.formContainer}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Correo electrónico</Text>
+              <TextInput
+                placeholder="Ingresa tu correo"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                style={styles.input}
+                placeholderTextColor="#A0A0A0"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Contraseña</Text>
+              <TextInput
+                placeholder="Ingresa tu contraseña"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                style={styles.input}
+                placeholderTextColor="#A0A0A0"
+              />
+            </View>
+
+            <TouchableOpacity style={styles.forgotPassword}>
+              <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleAuth}
+              disabled={loading}
+            >
+              {loading ? (
+                <Text style={styles.buttonText}>Cargando...</Text>
+              ) : (
+                <Text style={styles.buttonText}>Iniciar sesión</Text>
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.dividerContainer}>
+              <View style={styles.divider} />
+              <Text style={styles.dividerText}>o</Text>
+              <View style={styles.divider} />
+            </View>
+
+            <TouchableOpacity
+              style={styles.registerButton}
+              onPress={() => setIsLogin(!isLogin)}
+            >
+              <Text style={styles.registerButtonText}>
+                {isLogin ? "Crear una cuenta nueva" : "Ya tengo una cuenta"}
+              </Text>
+            </TouchableOpacity>
           </View>
-
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleAuth}
-            disabled={loading}
-          >
-            {loading ? (
-              <Text style={styles.buttonText}>Cargando...</Text>
-            ) : (
-              <Text style={styles.buttonText}>Iniciar sesión</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.switchContainer}
-            // onPress={() => setIsLogin(!isLogin)}
-          >
-            <Text style={styles.switchText}>
-              No tienes una cuenta? Registrate!
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 LoginScreen.propTypes = {
   onLogin: PropTypes.func.isRequired,
+  navigation: PropTypes.object,
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#FFFFFF",
+  },
+  keyboardView: {
+    flex: 1,
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: "center",
-    padding: 20,
+    paddingHorizontal: 24,
+    paddingTop: 40,
+    paddingBottom: 24,
   },
   headerContainer: {
     alignItems: "center",
     marginBottom: 40,
   },
+  logoContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "#FFF0EE",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
   logo: {
-    width: 80,
-    height: 80,
-    marginBottom: 20,
-    borderRadius: 10,
+    width: 60,
+    height: 60,
   },
   title: {
     fontSize: 28,
-    fontWeight: "bold",
-    color: "#1F2937",
+    fontWeight: "700",
+    color: "#2D3436",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: "#6B7280",
+    color: "#636E72",
     textAlign: "center",
   },
   formContainer: {
     width: "100%",
   },
   inputContainer: {
-    backgroundColor: "#F3F4F6",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    height: 56,
-    justifyContent: "center",
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#2D3436",
+    marginBottom: 8,
   },
   input: {
-    color: "#1F2937",
+    backgroundColor: "#F8F9FA",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     fontSize: 16,
+    color: "#2D3436",
+    borderWidth: 1,
+    borderColor: "#E9ECEF",
+  },
+  forgotPassword: {
+    alignSelf: "flex-end",
+    marginBottom: 24,
+  },
+  forgotPasswordText: {
+    color: "#FF6B6B",
+    fontSize: 14,
+    fontWeight: "500",
   },
   button: {
-    backgroundColor: "#6366F1",
+    backgroundColor: "#FF6B6B",
     borderRadius: 12,
     height: 56,
-    marginTop: 10,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#FF6B6B",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   buttonText: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#FFFFFF",
   },
-  switchContainer: {
-    marginTop: 20,
+  dividerContainer: {
+    flexDirection: "row",
     alignItems: "center",
+    marginVertical: 24,
   },
-  switchText: {
-    color: "#6366F1",
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#E9ECEF",
+  },
+  dividerText: {
+    paddingHorizontal: 16,
+    color: "#636E72",
+    fontSize: 14,
+  },
+  registerButton: {
+    height: 56,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E9ECEF",
+    backgroundColor: "#FFFFFF",
+  },
+  registerButtonText: {
     fontSize: 16,
+    fontWeight: "600",
+    color: "#2D3436",
   },
 });

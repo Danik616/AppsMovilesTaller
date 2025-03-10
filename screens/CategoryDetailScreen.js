@@ -7,8 +7,12 @@ import {
   ActivityIndicator,
   Image,
   TouchableOpacity,
+  Dimensions,
+  SafeAreaView,
 } from 'react-native';
 import PropTypes from 'prop-types';
+
+const windowWidth = Dimensions.get('window').width;
 
 export default function CategoryDetailScreen({ route, navigation }) {
   const { category } = route.params;
@@ -40,28 +44,48 @@ export default function CategoryDetailScreen({ route, navigation }) {
       style={styles.recipeItem}
       onPress={() => navigation.navigate('RecipeDetail', { recipe: item })}
     >
-      <Image source={{ uri: item.strMealThumb }} style={styles.image} />
-      <Text style={styles.recipeTitle}>{item.strMeal}</Text>
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: item.strMealThumb }} style={styles.image} />
+      </View>
+      <Text style={styles.recipeTitle} numberOfLines={2}>
+        {item.strMeal}
+      </Text>
     </TouchableOpacity>
   );
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{category} Recipes</Text>
+  const getBackgroundColor = (index) => {
+    // Alternate between different background colors based on index
+    const colors = ['#FF6B6B', '#FFD166', '#F38181'];
+    return colors[index % colors.length];
+  };
 
-      {isLoading && <ActivityIndicator size='large' color='#0000ff' />}
-      {meals.length === 0 && !isLoading && (
-        <Text style={styles.notFound}>No recipes found.</Text>
-      )}
-      {meals.length > 0 && !isLoading && (
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>{category}</Text>
+      </View>
+
+      <Text style={styles.sectionTitle}>Recipes</Text>
+
+      {isLoading ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size='large' color='#FF6B6B' />
+        </View>
+      ) : meals.length === 0 ? (
+        <View style={styles.notFoundContainer}>
+          <Text style={styles.notFound}>No recipes found.</Text>
+        </View>
+      ) : (
         <FlatList
           data={meals}
           keyExtractor={(item) => item.idMeal}
           renderItem={renderMealItem}
           contentContainerStyle={styles.listContainer}
+          numColumns={3}
+          columnWrapperStyle={styles.row}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -77,46 +101,86 @@ CategoryDetailScreen.propTypes = {
 };
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: '#ffffff', flex: 1, padding: 16 },
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F9FA',
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#FFFFFF',
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#2D3436',
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#2D3436',
+    marginTop: 16,
+    marginBottom: 8,
+    paddingHorizontal: 20,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  notFoundContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
   notFound: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
     textAlign: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  recipeItem: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#ffffff',
-    borderColor: '#6366F1',
-    borderWidth: 2,
-    marginBottom: 10,
-    borderRadius: 5,
-    gap: 5,
-  },
-  recipeTitle: {
-    fontSize: 18,
-    flexWrap: 'wrap',
-    width: '50%',
-    textAlign: 'center',
-  },
-  image: {
-    width: '50%',
-    height: undefined,
-    aspectRatio: 1,
-    marginBottom: 12,
-    borderRadius: 4,
-    resizeMode: 'cover',
+    color: '#FF6B6B',
   },
   listContainer: {
-    paddingHorizontal: 16,
+    padding: 12,
+  },
+  row: {
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  recipeItem: {
+    width: (windowWidth - 60) / 3,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  imageContainer: {
+    width: '100%',
+    aspectRatio: 1,
+    backgroundColor: '#FF6B6B',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  recipeTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#2D3436',
+    textAlign: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    lineHeight: 16,
   },
 });
-

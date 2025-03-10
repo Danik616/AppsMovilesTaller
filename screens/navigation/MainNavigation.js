@@ -16,7 +16,7 @@ function HomeTabs({ email, onLogout }) {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: "#6366F1",
+        tabBarActiveTintColor: "#FF6B6B",
         tabBarInactiveTintColor: "#9CA3AF",
         tabBarLabelStyle: {
           fontSize: 12,
@@ -87,9 +87,10 @@ export default function MainNavigator({ email, onLogout }) {
         name="CategoryDetail"
         component={CategoryDetailScreen} // Nueva pantalla
         options={{
-          headerTitle: "Recetas de Categoría",
+          headerTitle: "Categoria",
           headerBackTitle: "Atrás",
-          headerTintColor: "#6366F1",
+          headerTintColor: "#000000",
+
         }}
       />
 
@@ -99,7 +100,7 @@ export default function MainNavigator({ email, onLogout }) {
         options={{
           headerTitle: "Detalles de la receta",
           headerBackTitle: "Atrás",
-          headerTintColor: "#6366F1",
+          headerTintColor: "#000000",
         }}
       />
     </Stack.Navigator>

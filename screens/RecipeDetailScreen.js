@@ -1,225 +1,88 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
   Image,
+  ScrollView,
+  ActivityIndicator,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as ImagePicker from "expo-image-picker";
 import PropTypes from "prop-types";
 
-export default function RecipeDetailScreen({ route, navigation }) {
+export default function RecipeDetailScreen({ route }) {
   const { recipe } = route.params;
-  const [title, setTitle] = useState(recipe.title);
-  const [description, setDescription] = useState(
-    recipe.description || "Aquí irá la descripción y pasos de la receta."
-  );
-  const [image, setImage] = useState(recipe.image || null);
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [recipeDetails, setRecipeDetails] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSaveTitle = async () => {
-    setIsEditingTitle(false);
-    const updatedRecipe = { ...recipe, title };
-    await saveRecipe(updatedRecipe);
-  };
-
-  const handleSaveDescription = async () => {
-    setIsEditingDescription(false);
-    const updatedRecipe = { ...recipe, description };
-    await saveRecipe(updatedRecipe);
-  };
-
-  const handleAddImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "image",
-      allowsEditing: true,
-      aspect: undefined,
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets?.length > 0) {
-      const newImageUri = result.assets[0].uri;
-      setImage(newImageUri);
-      await saveRecipe({ ...recipe, image: newImageUri });
-    }
-  };
-
-  const saveRecipe = async (updatedRecipe) => {
+  // 🔹 Función para obtener los detalles de la receta por ID
+  const fetchRecipeDetails = async (idMeal) => {
     try {
-      const storedRecipes = await AsyncStorage.getItem("recipes");
-      let recipes = storedRecipes ? JSON.parse(storedRecipes) : [];
-
-      // 🔹 Buscar la receta por ID y actualizarla
-      recipes = recipes.map((r) =>
-        r.id === updatedRecipe.id ? updatedRecipe : r
+      const response = await fetch(
+        `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${idMeal}`
       );
-
-      await AsyncStorage.setItem("recipes", JSON.stringify(recipes));
-
-      console.log("✅ Receta guardada correctamente:", updatedRecipe);
-
-      // 🔹 Recarga la pantalla en lugar de regresar a Home
-      navigation.replace("RecipeDetail", { recipe: updatedRecipe });
+      const json = await response.json();
+      if (json.meals && json.meals.length > 0) {
+        setRecipeDetails(json.meals[0]); // Guardar los detalles en el estado
+      }
     } catch (error) {
-      console.error("❌ Error al guardar receta:", error);
+      console.error("Error al obtener los detalles de la receta:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleDeleteRecipe = async () => {
-    try {
-      const storedRecipes = await AsyncStorage.getItem("recipes");
-      const recipes = storedRecipes ? JSON.parse(storedRecipes) : [];
-      const updatedRecipes = recipes.filter((r) => r.id !== recipe.id);
-      await AsyncStorage.setItem("recipes", JSON.stringify(updatedRecipes));
-      navigation.navigate("Home", { updated: true }); // ✅ Se asegura de que Home sepa que se eliminó una receta
-    } catch (error) {
-      console.error("Failed to delete recipe", error);
+  useEffect(() => {
+    if (recipe.idMeal) {
+      fetchRecipeDetails(recipe.idMeal);
     }
-  };
+  }, [recipe.idMeal]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (!recipeDetails) {
+    return (
+      <View style={styles.loaderContainer}>
+        <Text style={styles.errorText}>No se encontraron detalles de la receta.</Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      {isEditingTitle ? (
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Nombre de la Receta"
-            value={title}
-            onChangeText={setTitle}
-          />
-        </View>
-      ) : (
-        <Text style={styles.title}>{title}</Text>
-      )}
-
-      {image && <Image source={{ uri: image }} style={styles.image} />}
-
-      {isEditingDescription ? (
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Nombre de la Receta"
-            value={description}
-            onChangeText={setDescription}
-          />
-        </View>
-      ) : (
-        <Text style={styles.description}>{description}</Text>
-      )}
-
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={
-            isEditingTitle ? handleSaveTitle : () => setIsEditingTitle(true)
-          }
-        >
-          <Text style={styles.buttonText}>
-            {isEditingTitle ? "Guardar Título" : "Editar Título"}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={
-            isEditingDescription
-              ? handleSaveDescription
-              : () => setIsEditingDescription(true)
-          }
-        >
-          <Text style={styles.buttonText}>
-            {isEditingDescription
-              ? "Guardar Descripción"
-              : "Editar Descripción"}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.button} onPress={handleAddImage}>
-          <Text style={styles.buttonText}>
-            {image ? "Editar Foto" : "Agregar Foto"}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={handleDeleteRecipe}
-        >
-          <Text style={styles.buttonText}>Eliminar Receta</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>{recipeDetails.strMeal}</Text>
+      <Image
+        source={{ uri: recipeDetails.strMealThumb }}
+        style={styles.image}
+      />
+      <Text style={styles.subtitle}>Categoría: {recipeDetails.strCategory}</Text>
+      <Text style={styles.subtitle}>Área: {recipeDetails.strArea}</Text>
+      <Text style={styles.sectionTitle}>Instrucciones</Text>
+      <Text style={styles.description}>{recipeDetails.strInstructions}</Text>
+    </ScrollView>
   );
 }
 
 RecipeDetailScreen.propTypes = {
   route: PropTypes.shape({
     params: PropTypes.shape({
-      recipe: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        title: PropTypes.string.isRequired,
-        description: PropTypes.string,
-        image: PropTypes.string,
-      }).isRequired,
+      recipe: PropTypes.object.isRequired,
     }).isRequired,
-  }).isRequired,
-  navigation: PropTypes.shape({
-    navigate: PropTypes.func.isRequired,
-    goBack: PropTypes.func.isRequired,
-    replace: PropTypes.func.isRequired,
   }).isRequired,
 };
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: "#ffffff", flex: 1, padding: 16 },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  description: { fontSize: 16, marginBottom: 12 },
-  inputContainer: {
-    backgroundColor: "#F3F4F6",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    height: 56,
-    justifyContent: "center",
-  },
-  input: {
-    color: "#1F2937",
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: "#6366F1",
-    borderRadius: 12,
-    height: 56,
-    marginTop: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  buttonText: { color: "white", textAlign: "center", fontSize: 16 },
-  deleteButton: {
-    backgroundColor: "red",
-    borderRadius: 12,
-    height: 56,
-    marginTop: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  buttonContainer: {
-    marginTop: "auto",
-  },
-  image: {
-    width: "100%",
-    height: undefined,
-    aspectRatio: 1,
-    marginBottom: 12,
-    borderRadius: 4,
-    resizeMode: "cover",
-  },
+  container: { flex: 1, padding: 16, backgroundColor: "#ffffff" },
+  loaderContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  errorText: { fontSize: 18, color: "red", textAlign: "center" },
+  title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 10 },
+  subtitle: { fontSize: 18, textAlign: "center", marginVertical: 5 },
+  sectionTitle: { fontSize: 20, fontWeight: "bold", marginTop: 15 },
+  description: { fontSize: 16, textAlign: "justify", marginTop: 10 },
+  image: { width: "100%", height: 250, borderRadius: 10, marginBottom: 10 },
 });

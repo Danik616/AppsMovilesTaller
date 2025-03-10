@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -7,34 +7,21 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
-} from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import PropTypes from "prop-types";
+  Dimensions,
+  SafeAreaView,
+} from 'react-native';
+import PropTypes from 'prop-types';
 
-const initialState = [];
-
-function recipesReducer(state, action) {
-  switch (action.type) {
-    case "ADD_RECIPE":
-      return addRecipeToState(state, action.payload);
-
-    case "SET_RECIPES":
-      return action.payload;
-
-    default:
-      return state;
-  }
-}
+const windowWidth = Dimensions.get('window').width;
 
 export default function HomeScreen({ navigation, route }) {
-  const [recipes, dispatch] = useReducer(recipesReducer, initialState);
   const [isLoading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
   const getCategories = async () => {
     try {
       const response = await fetch(
-        "https://www.themealdb.com/api/json/v1/1/categories.php"
+        'https://www.themealdb.com/api/json/v1/1/categories.php'
       );
       const json = await response.json();
       setData(json.categories);
@@ -49,55 +36,46 @@ export default function HomeScreen({ navigation, route }) {
     getCategories();
   }, []);
 
-  useEffect(() => {
-    const reloadRecipes = async () => {
-      try {
-        console.log("🔄 Recargando recetas desde AsyncStorage...");
-        const storedRecipes = await AsyncStorage.getItem("recipes");
-        if (storedRecipes) {
-          dispatch({ type: "SET_RECIPES", payload: JSON.parse(storedRecipes) });
-        }
-      } catch (error) {
-        console.error("Error al recargar recetas:", error);
-      }
-    };
-
-    const unsubscribe = navigation.addListener("focus", () => {
-      reloadRecipes();
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
-  console.log("Recipes:", recipes);
-
-  const renderCategories = ({ item }) => (
+  const renderCategories = ({ item, index }) => (
     <TouchableOpacity
       style={styles.recipeItem}
       onPress={() =>
-        navigation.navigate("CategoryDetail", { category: item.strCategory })
+        navigation.navigate('CategoryDetail', { category: item.strCategory })
       }
     >
-      <Text style={styles.recipeTitle}>{item.strCategory}</Text>
-      <Image source={{ uri: item.strCategoryThumb }} style={styles.image} />
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: item.strCategoryThumb }} style={styles.image} />
+      </View>
+      <Text style={styles.categoryName}>{item.strCategory}</Text>
+      <Text style={styles.categoryDescription} numberOfLines={1}>
+        {item.strCategoryDescription.split('.')[0]}
+      </Text>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Categorias</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Recipes App</Text>
+      </View>
+
+      <Text style={styles.sectionTitle}>Categories</Text>
 
       {isLoading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size='large' color='#FF6B6B' />
+        </View>
       ) : (
         <FlatList
           data={data}
           keyExtractor={(item) => item.idCategory}
           renderItem={renderCategories}
           contentContainerStyle={styles.listContainer}
+          numColumns={3}
+          columnWrapperStyle={styles.row}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -116,43 +94,82 @@ HomeScreen.propTypes = {
 };
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: "#ffffff", flex: 1, padding: 16 },
-  notFound: {
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F9FA',
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#FFFFFF',
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#2D3436',
   },
-  recipeItem: {
-    padding: 16,
-    backgroundColor: "#ffffff",
-    borderColor: "#6366F1",
-    borderWidth: 2,
-    marginBottom: 10,
-    borderRadius: 5,
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#2D3436',
+    marginTop: 16,
+    marginBottom: 8,
+    paddingHorizontal: 20,
   },
-  recipeTitle: { fontSize: 18 },
-  addButton: {
-    backgroundColor: "#ffa500",
-    padding: 12,
-    borderRadius: 4,
-    marginTop: 20,
-  },
-  image: {
-    width: "100%",
-    height: undefined,
-    aspectRatio: 1,
-    marginBottom: 12,
-    borderRadius: 4,
-    resizeMode: "cover",
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   listContainer: {
-    paddingHorizontal: 16,
+    padding: 12,
   },
-  addButtonText: { color: "white", textAlign: "center", fontSize: 16 },
+  row: {
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  recipeItem: {
+    width: (windowWidth - 60) / 3,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  imageContainer: {
+    width: '100%',
+    aspectRatio: 1,
+    backgroundColor: '#FF6B6B',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: '80%',
+    height: '80%',
+    resizeMode: 'contain',
+  },
+  categoryName: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#2D3436',
+    textAlign: 'center',
+    paddingTop: 8,
+    paddingHorizontal: 4,
+  },
+  categoryDescription: {
+    fontSize: 10,
+    color: '#636E72',
+    textAlign: 'center',
+    paddingBottom: 8,
+    paddingHorizontal: 4,
+  },
 });

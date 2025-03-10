@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -7,8 +7,8 @@ import {
   ActivityIndicator,
   Image,
   TouchableOpacity,
-} from "react-native";
-import PropTypes from "prop-types";
+} from 'react-native';
+import PropTypes from 'prop-types';
 
 export default function CategoryDetailScreen({ route, navigation }) {
   const { category } = route.params;
@@ -21,11 +21,11 @@ export default function CategoryDetailScreen({ route, navigation }) {
         `https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`
       );
       const json = await response.json();
-      setMeals(json.meals || []); 
+      setMeals(json.meals || []);
     } catch (error) {
-      console.error("Error al obtener las recetas:", error);
+      console.error('Error al obtener las recetas:', error);
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   };
 
@@ -38,10 +38,10 @@ export default function CategoryDetailScreen({ route, navigation }) {
   const renderMealItem = ({ item }) => (
     <TouchableOpacity
       style={styles.recipeItem}
-      onPress={() => navigation.navigate("RecipeDetail", { recipe: item })}
+      onPress={() => navigation.navigate('RecipeDetail', { recipe: item })}
     >
-      <Text style={styles.recipeTitle}>{item.strMeal}</Text>
       <Image source={{ uri: item.strMealThumb }} style={styles.image} />
+      <Text style={styles.recipeTitle}>{item.strMeal}</Text>
     </TouchableOpacity>
   );
 
@@ -49,7 +49,7 @@ export default function CategoryDetailScreen({ route, navigation }) {
     <View style={styles.container}>
       <Text style={styles.title}>{category} Recipes</Text>
 
-      {isLoading && <ActivityIndicator size="large" color="#0000ff" />}
+      {isLoading && <ActivityIndicator size='large' color='#0000ff' />}
       {meals.length === 0 && !isLoading && (
         <Text style={styles.notFound}>No recipes found.</Text>
       )}
@@ -77,36 +77,46 @@ CategoryDetailScreen.propTypes = {
 };
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: "#ffffff", flex: 1, padding: 16 },
+  container: { backgroundColor: '#ffffff', flex: 1, padding: 16 },
   notFound: {
     fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 20,
   },
   recipeItem: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 16,
-    backgroundColor: "#ffffff",
-    borderColor: "#6366F1",
+    backgroundColor: '#ffffff',
+    borderColor: '#6366F1',
     borderWidth: 2,
     marginBottom: 10,
     borderRadius: 5,
+    gap: 5,
   },
-  recipeTitle: { fontSize: 18 },
+  recipeTitle: {
+    fontSize: 18,
+    flexWrap: 'wrap',
+    width: '50%',
+    textAlign: 'center',
+  },
   image: {
-    width: "100%",
+    width: '50%',
     height: undefined,
     aspectRatio: 1,
     marginBottom: 12,
     borderRadius: 4,
-    resizeMode: "cover",
+    resizeMode: 'cover',
   },
   listContainer: {
     paddingHorizontal: 16,
   },
 });
+

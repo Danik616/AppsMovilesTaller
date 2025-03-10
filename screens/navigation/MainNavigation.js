@@ -5,8 +5,8 @@ import PropTypes from "prop-types";
 import React, { useEffect } from "react";
 import HomeScreen from "../HomeScreen";
 import { Text } from "react-native";
-import AddRecipeScreen from "../AddRecipeScreen";
 import RecipeDetailScreen from "../RecipeDetailScreen";
+import RandomRecipe from '../RandomRecipe';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -44,15 +44,15 @@ function HomeTabs({ email, onLogout }) {
       </Tab.Screen>
 
       <Tab.Screen
-        name="Añadir Receta"
+        name="Receta aleatoria"
         options={{
           tabBarIcon: ({ color }) => (
-            <Text style={{ color, fontSize: 20 }}>🍴</Text>
+            <Text style={{ color, fontSize: 20 }}>🔀</Text>
           ),
           headerShown: false,
         }}
       >
-        {(props) => <AddRecipeScreen {...props} />}
+        {(props) => <RandomRecipe {...props} />}
       </Tab.Screen>
 
       <Tab.Screen
@@ -82,16 +82,6 @@ export default function MainNavigator({ email, onLogout }) {
       <Stack.Screen name="Home" options={{ headerShown: false }}>
         {(props) => <HomeTabs {...props} email={email} onLogout={onLogout} />}
       </Stack.Screen>
-
-      <Stack.Screen
-        name="AddRecipe"
-        component={AddRecipeScreen}
-        options={{
-          headerTitle: "Añadir receta",
-          headerBackTitle: "Atrás",
-          headerTintColor: "#6366F1",
-        }}
-      />
 
       <Stack.Screen
         name="CategoryDetail"

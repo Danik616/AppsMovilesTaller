@@ -149,13 +149,11 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   image: {
-    width: '80%',
-    height: '80%',
-    resizeMode: 'contain',
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   categoryName: {
     fontSize: 12,

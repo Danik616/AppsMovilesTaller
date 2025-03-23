@@ -6,7 +6,9 @@ import React, { useEffect } from "react";
 import HomeScreen from "../HomeScreen";
 import { Text } from "react-native";
 import RecipeDetailScreen from "../RecipeDetailScreen";
-import RandomRecipe from '../RandomRecipe';
+import RandomRecipe from "../RandomRecipe";
+import CreateRecipeScreen from "../CreateRecipeScreen";
+import FavoritesScreen from "../FavoritesScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -56,6 +58,30 @@ function HomeTabs({ email, onLogout }) {
       </Tab.Screen>
 
       <Tab.Screen
+        name="Favoritos"
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Text style={{ color, fontSize: 20 }}>❤️</Text>
+          ),
+          headerShown: false,
+        }}
+      >
+        {(props) => <FavoritesScreen {...props} />}
+      </Tab.Screen>
+
+      <Tab.Screen
+        name="Crear receta"
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Text style={{ color, fontSize: 20 }}>✍️</Text>
+          ),
+          headerShown: false,
+        }}
+      >
+        {(props) => <CreateRecipeScreen {...props} />}
+      </Tab.Screen>
+
+      <Tab.Screen
         name="Cerrar sesión"
         options={{
           tabBarIcon: ({ color }) => (
@@ -90,7 +116,6 @@ export default function MainNavigator({ email, onLogout }) {
           headerTitle: "Categoria",
           headerBackTitle: "Atrás",
           headerTintColor: "#000000",
-
         }}
       />
 

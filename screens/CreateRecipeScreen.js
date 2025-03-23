@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, TextInput, Button, Text, ScrollView, Image } from "react-native";
-import { launchImageLibrary } from "react-native-image-picker";
+import * as ImagePicker from "expo-image-picker";
 import { database, ref as dbRef, push } from "../firebase";
 
 const CreateRecipeScreen = () => {
@@ -9,24 +9,19 @@ const CreateRecipeScreen = () => {
   const [instructions, setInstructions] = useState("");
   const [ingredients, setIngredients] = useState([""]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imageBase64, setImageBase64] = useState(null);
+  const [imageUri, setImageUri] = useState(null);
 
-  const pickImage = () => {
-    const options = {
-      mediaType: "photo",
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: undefined,
       quality: 1,
-      includeBase64: true,
-    };
-
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel) {
-        console.log("El usuario canceló la selección de imagen");
-      } else if (response.errorCode) {
-        console.log("Error en ImagePicker: ", response.errorMessage);
-      } else if (response.assets && response.assets.length > 0) {
-        setImageBase64(response.assets[0].base64);
-      }
     });
+
+    if (!result.canceled && result.assets?.length > 0) {
+      setImageUri(result.assets[0].uri);
+    }
   };
 
   const handleIngredientChange = (text, index) => {
@@ -52,7 +47,7 @@ const CreateRecipeScreen = () => {
       strCategory: category,
       strInstructions: instructions,
       ingredients: ingredients,
-      strMealThumb: imageBase64 ? `data:image/jpeg;base64,${imageBase64}` : "",
+      strMealThumb: imageUri || "",
     };
 
     push(dbRef(database, "/userRecipes"), newRecipe)
@@ -62,7 +57,7 @@ const CreateRecipeScreen = () => {
         setCategory("");
         setInstructions("");
         setIngredients([""]);
-        setImageBase64(null);
+        setImageUri(null);
       })
       .catch((error) => {
         console.error("Error al crear receta: ", error);
@@ -115,9 +110,9 @@ const CreateRecipeScreen = () => {
         <Button title="Agregar Ingrediente" onPress={handleAddIngredient} />
 
         <Button title="Seleccionar Imagen" onPress={pickImage} />
-        {imageBase64 && (
+        {imageUri && (
           <Image
-            source={{ uri: `data:image/jpeg;base64,${imageBase64}` }}
+            source={{ uri: imageUri }}
             style={{ width: 200, height: 200, marginVertical: 10 }}
           />
         )}

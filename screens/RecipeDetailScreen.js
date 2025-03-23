@@ -11,6 +11,7 @@ import {
   Linking,
 } from 'react-native';
 import PropTypes from 'prop-types';
+import { database, ref as dbRef, push } from "../firebase";
 
 export default function RecipeDetailScreen({ route, navigation }) {
   const { recipe } = route.params;
@@ -77,6 +78,21 @@ export default function RecipeDetailScreen({ route, navigation }) {
 
   const ingredients = getIngredients(recipeDetails);
 
+  const handleNewFavorite = () => {
+    setIsSubmitting(true);
+
+    const newFavorite = {
+      strMeal: recipeDetails.strMeal,
+      strCategory: recipeDetails.strCategory,
+      strArea: recipeDetails.strArea,
+      strInstructions: recipeDetails.strInstructions,
+      stringredients: ingredients,
+      strMealThumb: recipeDetails.strMealThumb || " ",
+    };
+
+    push(dbRef(database, "/favorites"), newFavorite)
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -135,6 +151,10 @@ export default function RecipeDetailScreen({ route, navigation }) {
               </TouchableOpacity>
             </View>
           )}
+
+          <TouchableOpacity style={styles.favoriteButton} onPress={handleNewFavorite}>
+            <Text style={styles.favoriteButtonText}>Agregar a Favoritos</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -265,6 +285,19 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   youtubeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  favoriteButton: {
+    backgroundColor: '#FF6B6B',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  favoriteButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',

@@ -17,6 +17,7 @@ export default function RecipeDetailScreen({ route, navigation }) {
   const { recipe } = route.params;
   const [recipeDetails, setRecipeDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Function to get recipe details by ID
   const fetchRecipeDetails = async (idMeal) => {

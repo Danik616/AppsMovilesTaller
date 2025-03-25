@@ -1,6 +1,4 @@
-// FavoritesScreen.js
-import React, { useState, useEffect } from "react";
-import PropTypes from 'prop-types';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -11,36 +9,56 @@ import {
   SafeAreaView,
   Dimensions,
   Image,
-} from "react-native";
-import { database, ref, get, child, push } from "../firebase"; // Ensure push is imported
+  RefreshControl,
+} from 'react-native';
+import { database, ref, get, push } from '../firebase'; // Ensure push is imported
+import { useFocusEffect } from '@react-navigation/native'; // Importar useFocusEffect
 
 const windowWidth = Dimensions.get('window').width;
 
 const FavoritesScreen = ({ navigation }) => {
   const [favorites, setFavorites] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Obtener recetas favoritas desde Firebase
   const getFavorites = async () => {
     try {
-      const favoritesRef = ref(database, "/favorites");
+      setIsLoading(true);
+      const favoritesRef = ref(database, '/favorites');
       const snapshot = await get(favoritesRef);
       const data = snapshot.val();
       const recipes = data ? Object.values(data) : [];
       setFavorites(recipes);
     } catch (error) {
-      console.error("Error fetching favorites: ", error);
+      console.error('Error fetching favorites: ', error);
     } finally {
       setIsLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  // Usar useFocusEffect para actualizar los favoritos cada vez que la pantalla recibe el foco
+  useFocusEffect(
+    React.useCallback(() => {
+      getFavorites();
+    }, [])
+  );
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    getFavorites();
   };
 
   const addFavorite = (recipe) => {
     const newFavorite = { ...recipe };
-    const favoritesRef = ref(database, "/favorites");
+    const favoritesRef = ref(database, '/favorites');
     push(favoritesRef, newFavorite)
-      .then(() => alert("Receta agregada a favoritos"))
-      .catch((error) => console.error("Error adding favorite: ", error));
+      .then(() => {
+        alert('Receta agregada a favoritos');
+        getFavorites(); // Actualizar la lista después de agregar
+      })
+      .catch((error) => console.error('Error adding favorite: ', error));
   };
 
   const renderMealItem = ({ item }) => (
@@ -49,46 +67,49 @@ const FavoritesScreen = ({ navigation }) => {
       onPress={() => navigation.navigate('RecipeDetail', { recipe: item })}
     >
       <View style={styles.imageContainer}>
-         <Image source={{ uri: item.strMealThumb }} style={styles.image} />
+        <Image source={{ uri: item.strMealThumb }} style={styles.image} />
       </View>
       <Text style={styles.recipeTitle} numberOfLines={2}>
-         {item.strMeal}
+        {item.strMeal}
       </Text>
     </TouchableOpacity>
   );
 
-  useEffect(() => {
-    getFavorites();
-  }, []);
-
   return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Favoritos</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Favoritos</Text>
+      </View>
+
+      <Text style={styles.sectionTitle}>Recipes</Text>
+
+      {isLoading && !refreshing ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size='large' color='#FF6B6B' />
         </View>
-  
-        <Text style={styles.sectionTitle}>Recipes</Text>
-  
-        {isLoading ? (
-          <View style={styles.loaderContainer}>
-            <ActivityIndicator size='large' color='#FF6B6B' />
-          </View>
-        ) : favorites.length === 0 ? (
-          <View style={styles.notFoundContainer}>
-            <Text style={styles.notFound}>No recipes found.</Text>
-          </View>
-        ) : (
-          <FlatList
-            data={favorites}
-            keyExtractor={(item) => item.id || item.strMeal}
-            renderItem={renderMealItem}
-            contentContainerStyle={styles.listContainer}
-            numColumns={3}
-            columnWrapperStyle={styles.row}
-          />
-        )}
-      </SafeAreaView>
-    );
+      ) : favorites.length === 0 ? (
+        <View style={styles.notFoundContainer}>
+          <Text style={styles.notFound}>No recipes found.</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={favorites}
+          keyExtractor={(item) => item.id || item.strMeal}
+          renderItem={renderMealItem}
+          contentContainerStyle={styles.listContainer}
+          numColumns={3}
+          columnWrapperStyle={styles.row}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#FF6B6B']}
+            />
+          }
+        />
+      )}
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -101,7 +122,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     backgroundColor: '#FFFFFF',
   },
-  headerTitle: { 
+  headerTitle: {
     fontSize: 28,
     fontWeight: '700',
     color: '#2D3436',
@@ -175,6 +196,5 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
 });
-
 
 export default FavoritesScreen;

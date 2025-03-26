@@ -83,6 +83,7 @@ export default function RecipeDetailScreen({ route, navigation }) {
     setIsSubmitting(true);
 
     const newFavorite = {
+      idMeal: recipeDetails.idMeal,
       strMeal: recipeDetails.strMeal,
       strCategory: recipeDetails.strCategory,
       strArea: recipeDetails.strArea,

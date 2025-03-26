@@ -17,7 +17,7 @@ import { database, ref, get } from "../firebase";
 
 const windowWidth = Dimensions.get("window").width;
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({ user, navigation }) {
   const [isLoading, setIsLoading] = useState(true);
   const [categories, setCategories] = useState([]);
   const [userRecipes, setUserRecipes] = useState([]);
@@ -97,6 +97,7 @@ export default function HomeScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Recipes App</Text>
+        <Text>Hola, {user.displayName}!</Text>
       </View>
 
       <View style={styles.dropdownContainer}>

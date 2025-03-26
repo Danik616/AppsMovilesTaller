@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,58 +6,133 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Image,
   SafeAreaView,
   Dimensions,
-} from "react-native";
-import icon from "../assets/icon.png";
-import PropTypes from "prop-types";
+} from 'react-native';
+import icon from '../assets/icon.png';
+import PropTypes from 'prop-types';
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+} from 'firebase/auth';
 
 const windowWidth = Dimensions.get('window').width;
 
-export default function LoginScreen({ onLogin, navigation }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
+export default function LoginScreen({ navigation }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
-  function handleAuth() {
-    if (!email || !password) {
-      Alert.alert("Error", "Please enter both email and password");
-      return;
-    }
-
-    if (password.length < 6) {
-      Alert.alert("Error", "Password must be at least 6 characters");
-      return;
-    }
-
-    setLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      if (isLogin) {
-        // In a real app, you would validate credentials against your backend
-        onLogin(email);
-      } else {
-        // In a real app, you would register the user in your backend
-        Alert.alert("Success", "Account created successfully!");
-        setIsLogin(true);
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // El usuario ya está autenticado, redirigir a Home
+        navigation.replace('Main');
       }
-    }, 1500);
+      setInitializing(false);
+    });
+
+    // Limpiar el listener cuando el componente se desmonte
+    return unsubscribe;
+  }, []);
+
+  // Validación de email
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      setEmailError('El correo electrónico es obligatorio');
+      return false;
+    } else if (!emailRegex.test(email)) {
+      setEmailError('Introduce un correo electrónico válido');
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
+
+  // Validación de contraseña
+  const validatePassword = (password) => {
+    if (!password) {
+      setPasswordError('La contraseña es obligatoria');
+      return false;
+    } else if (password.length < 6) {
+      setPasswordError('La contraseña debe tener al menos 6 caracteres');
+      return false;
+    }
+    setPasswordError('');
+    return true;
+  };
+
+  const handleLogin = () => {
+    // Validar los campos antes de proceder
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+
+    if (!isEmailValid || !isPasswordValid) {
+      return;
+    }
+
+    setIsLoading(true);
+    const auth = getAuth();
+
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        
+        navigation.navigate('Home');
+      })
+      .catch((error) => {
+        // Traducción de errores comunes de Firebase para una mejor UX
+        let errorMessage;
+        switch (error.code) {
+          case 'auth/user-not-found':
+            errorMessage =
+              'No existe ninguna cuenta con este correo electrónico';
+            break;
+          case 'auth/wrong-password':
+            errorMessage = 'Contraseña incorrecta';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = 'Demasiados intentos fallidos. Inténtalo más tarde';
+            break;
+          default:
+            errorMessage = error.message;
+        }
+        Alert.alert('Error', errorMessage);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
+  // Muestra un spinner mientras se verifica el estado de autenticación
+  if (initializing) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size='large' color='#1976d2' />
+        <Text style={styles.loadingText}>Cargando...</Text>
+      </View>
+    );
   }
 
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
         >
@@ -73,38 +148,52 @@ export default function LoginScreen({ onLogin, navigation }) {
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Correo electrónico</Text>
               <TextInput
-                placeholder="Ingresa tu correo"
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
                 style={styles.input}
-                placeholderTextColor="#A0A0A0"
+                placeholder='Ingresa tu correo electrónico'
+                value={email}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (emailError) validateEmail(text);
+                }}
+                keyboardType='email-address'
+                autoCapitalize='none'
+                placeholderTextColor='#A0A0A0'
               />
+              {emailError ? (
+                <Text style={styles.errorText}>{emailError}</Text>
+              ) : null}
             </View>
 
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Contraseña</Text>
               <TextInput
-                placeholder="Ingresa tu contraseña"
+                placeholder='Ingresa tu contraseña'
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (passwordError) validatePassword(text);
+                }}
                 secureTextEntry
                 style={styles.input}
-                placeholderTextColor="#A0A0A0"
+                placeholderTextColor='#A0A0A0'
               />
+              {passwordError ? (
+                <Text style={styles.errorText}>{passwordError}</Text>
+              ) : null}
             </View>
 
             <TouchableOpacity style={styles.forgotPassword}>
-              <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
+              <Text style={styles.forgotPasswordText}>
+                ¿Olvidaste tu contraseña?
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.button}
-              onPress={handleAuth}
-              disabled={loading}
+              onPress={handleLogin}
+              disabled={isLoading}
             >
-              {loading ? (
+              {isLoading ? (
                 <Text style={styles.buttonText}>Cargando...</Text>
               ) : (
                 <Text style={styles.buttonText}>Iniciar sesión</Text>
@@ -117,14 +206,15 @@ export default function LoginScreen({ onLogin, navigation }) {
               <View style={styles.divider} />
             </View>
 
-            <TouchableOpacity
-              style={styles.registerButton}
-              onPress={() => setIsLogin(!isLogin)}
-            >
-              <Text style={styles.registerButtonText}>
-                {isLogin ? "Crear una cuenta nueva" : "Ya tengo una cuenta"}
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.signupContainer}>
+              <Text style={styles.signupText}>¿No tienes cuenta? </Text>
+              <TouchableOpacity
+                style={styles.registerButton}
+                onPress={() => navigation.navigate('Register')}
+              >
+                <Text style={styles.signupLink}>Regístrate</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -133,14 +223,13 @@ export default function LoginScreen({ onLogin, navigation }) {
 }
 
 LoginScreen.propTypes = {
-  onLogin: PropTypes.func.isRequired,
   navigation: PropTypes.object,
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
   },
   keyboardView: {
     flex: 1,
@@ -152,18 +241,18 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   headerContainer: {
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 40,
   },
   logoContainer: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "#FFF0EE",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: '#FFF0EE',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 24,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -178,53 +267,53 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: "700",
-    color: "#2D3436",
+    fontWeight: '700',
+    color: '#2D3436',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: "#636E72",
-    textAlign: "center",
+    color: '#636E72',
+    textAlign: 'center',
   },
   formContainer: {
-    width: "100%",
+    width: '100%',
   },
   inputContainer: {
     marginBottom: 20,
   },
   inputLabel: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#2D3436",
+    fontWeight: '600',
+    color: '#2D3436',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "#F8F9FA",
+    backgroundColor: '#F8F9FA',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: "#2D3436",
+    color: '#2D3436',
     borderWidth: 1,
-    borderColor: "#E9ECEF",
+    borderColor: '#E9ECEF',
   },
   forgotPassword: {
-    alignSelf: "flex-end",
+    alignSelf: 'flex-end',
     marginBottom: 24,
   },
   forgotPasswordText: {
-    color: "#FF6B6B",
+    color: '#FF6B6B',
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   button: {
-    backgroundColor: "#FF6B6B",
+    backgroundColor: '#FF6B6B',
     borderRadius: 12,
     height: 56,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#FF6B6B",
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#FF6B6B',
     shadowOffset: {
       width: 0,
       height: 4,
@@ -235,36 +324,36 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 16,
-    fontWeight: "700",
-    color: "#FFFFFF",
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginVertical: 24,
   },
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: "#E9ECEF",
+    backgroundColor: '#E9ECEF',
   },
   dividerText: {
     paddingHorizontal: 16,
-    color: "#636E72",
+    color: '#636E72',
     fontSize: 14,
   },
   registerButton: {
     height: 56,
     borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 1,
-    borderColor: "#E9ECEF",
-    backgroundColor: "#FFFFFF",
+    borderColor: '#E9ECEF',
+    backgroundColor: '#FFFFFF',
   },
   registerButtonText: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#2D3436",
+    fontWeight: '600',
+    color: '#2D3436',
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -9,10 +9,10 @@ import {
   TouchableOpacity,
   Dimensions,
   SafeAreaView,
-} from 'react-native';
-import PropTypes from 'prop-types';
+} from "react-native";
+import PropTypes from "prop-types";
 
-const windowWidth = Dimensions.get('window').width;
+const windowWidth = Dimensions.get("window").width;
 
 export default function CategoryDetailScreen({ route, navigation }) {
   const { category } = route.params;
@@ -27,7 +27,7 @@ export default function CategoryDetailScreen({ route, navigation }) {
       const json = await response.json();
       setMeals(json.meals || []);
     } catch (error) {
-      console.error('Error al obtener las recetas:', error);
+      console.error("Error al obtener las recetas:", error);
     } finally {
       setIsLoading(false);
     }
@@ -42,7 +42,12 @@ export default function CategoryDetailScreen({ route, navigation }) {
   const renderMealItem = ({ item }) => (
     <TouchableOpacity
       style={styles.recipeItem}
-      onPress={() => navigation.navigate('RecipeDetail', { recipe: item })}
+      onPress={() =>
+        navigation.navigate("RecipeDetail", {
+          recipe: item,
+          isUserRecipe: false,
+        })
+      }
     >
       <View style={styles.imageContainer}>
         <Image source={{ uri: item.strMealThumb }} style={styles.image} />
@@ -55,7 +60,7 @@ export default function CategoryDetailScreen({ route, navigation }) {
 
   const getBackgroundColor = (index) => {
     // Alternate between different background colors based on index
-    const colors = ['#FF6B6B', '#FFD166', '#F38181'];
+    const colors = ["#FF6B6B", "#FFD166", "#F38181"];
     return colors[index % colors.length];
   };
 
@@ -69,7 +74,7 @@ export default function CategoryDetailScreen({ route, navigation }) {
 
       {isLoading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size='large' color='#FF6B6B' />
+          <ActivityIndicator size="large" color="#FF6B6B" />
         </View>
       ) : meals.length === 0 ? (
         <View style={styles.notFoundContainer}>
@@ -103,56 +108,56 @@ CategoryDetailScreen.propTypes = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: "#F8F9FA",
   },
   header: {
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: '700',
-    color: '#2D3436',
+    fontWeight: "700",
+    color: "#2D3436",
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#2D3436',
+    fontWeight: "600",
+    color: "#2D3436",
     marginTop: 16,
     marginBottom: 8,
     paddingHorizontal: 20,
   },
   loaderContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   notFoundContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 20,
   },
   notFound: {
     fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
-    color: '#FF6B6B',
+    fontWeight: "600",
+    textAlign: "center",
+    color: "#FF6B6B",
   },
   listContainer: {
     padding: 12,
   },
   row: {
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     marginBottom: 16,
   },
   recipeItem: {
     width: (windowWidth - 60) / 3,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
+    overflow: "hidden",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -162,23 +167,23 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   imageContainer: {
-    width: '100%',
+    width: "100%",
     aspectRatio: 1,
-    backgroundColor: '#FF6B6B',
+    backgroundColor: "#FF6B6B",
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
   recipeTitle: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#2D3436',
-    textAlign: 'center',
+    fontWeight: "600",
+    color: "#2D3436",
+    textAlign: "center",
     paddingVertical: 8,
     paddingHorizontal: 6,
     lineHeight: 16,

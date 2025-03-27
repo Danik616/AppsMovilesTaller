@@ -79,7 +79,12 @@ export default function HomeScreen({ user, navigation }) {
   const renderUserRecipeItem = ({ item }) => (
     <TouchableOpacity
       style={styles.recipeItem}
-      onPress={() => navigation.navigate("RecipeDetail", { recipe: item })}
+      onPress={() =>
+        navigation.navigate("RecipeDetail", {
+          recipe: item,
+          isUserRecipe: true,
+        })
+      }
     >
       <View style={styles.imageContainer}>
         <Image

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -9,17 +9,15 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Linking,
-} from 'react-native';
-import PropTypes from 'prop-types';
-import { database, ref as dbRef, push } from "../firebase";
+} from "react-native";
+import PropTypes from "prop-types";
 
 export default function RecipeDetailScreen({ route, navigation }) {
-  const { recipe } = route.params;
+  const { recipe, isUserRecipe } = route.params;
   const [recipeDetails, setRecipeDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Function to get recipe details by ID
+  // Function to get recipe details by ID from API
   const fetchRecipeDetails = async (idMeal) => {
     try {
       const response = await fetch(
@@ -30,39 +28,53 @@ export default function RecipeDetailScreen({ route, navigation }) {
         setRecipeDetails(json.meals[0]);
       }
     } catch (error) {
-      console.error('Error al obtener los detalles de la receta:', error);
+      console.error("Error al obtener los detalles de la receta:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Extract ingredients and measurements from recipe data
+  // Extract ingredients and measurements from recipe data (for API recipes)
   const getIngredients = (recipe) => {
     const ingredients = [];
     for (let i = 1; i <= 20; i++) {
       const ingredient = recipe[`strIngredient${i}`];
       const measure = recipe[`strMeasure${i}`];
 
-      if (ingredient && ingredient.trim() !== '') {
+      if (ingredient && ingredient.trim() !== "") {
         ingredients.push({
           ingredient: ingredient,
-          measure: measure || '',
+          measure: measure || "",
         });
       }
     }
     return ingredients;
   };
 
+  // Map ingredients when the recipe is from the user's database
+  const mapUserRecipeIngredients = (ingredients) => {
+    return ingredients.split(", ").map((item) => {
+      const parts = item.split(" (");
+      return {
+        ingredient: parts[0],
+        measure: parts[1]?.replace(")", "") || "",
+      };
+    });
+  };
+
   useEffect(() => {
-    if (recipe.idMeal) {
+    if (isUserRecipe) {
+      setRecipeDetails(recipe);
+      setIsLoading(false);
+    } else {
       fetchRecipeDetails(recipe.idMeal);
     }
-  }, [recipe.idMeal]);
+  }, [recipe, isUserRecipe]);
 
   if (isLoading) {
     return (
       <View style={styles.loaderContainer}>
-        <ActivityIndicator size='large' color='#FF6B6B' />
+        <ActivityIndicator size="large" color="#FF6B6B" />
       </View>
     );
   }
@@ -77,7 +89,9 @@ export default function RecipeDetailScreen({ route, navigation }) {
     );
   }
 
-  const ingredients = getIngredients(recipeDetails);
+  const ingredients = isUserRecipe
+    ? mapUserRecipeIngredients(recipe.ingredients)
+    : getIngredients(recipeDetails);
 
   const handleNewFavorite = () => {
     setIsSubmitting(true);
@@ -92,7 +106,7 @@ export default function RecipeDetailScreen({ route, navigation }) {
       strMealThumb: recipeDetails.strMealThumb || " ",
     };
 
-    push(dbRef(database, "/favorites"), newFavorite)
+    push(dbRef(database, "/favorites"), newFavorite);
   };
 
   return (
@@ -129,7 +143,7 @@ export default function RecipeDetailScreen({ route, navigation }) {
               <View key={index} style={styles.ingredientItem}>
                 <View style={styles.ingredientDot} />
                 <Text style={styles.ingredientText}>
-                  {item.ingredient} {item.measure ? `(${item.measure})` : ''}
+                  {item.ingredient} {item.measure ? `(${item.measure})` : ""}
                 </Text>
               </View>
             ))}
@@ -154,7 +168,10 @@ export default function RecipeDetailScreen({ route, navigation }) {
             </View>
           )}
 
-          <TouchableOpacity style={styles.favoriteButton} onPress={handleNewFavorite}>
+          <TouchableOpacity
+            style={styles.favoriteButton}
+            onPress={handleNewFavorite}
+          >
             <Text style={styles.favoriteButtonText}>Agregar a Favoritos</Text>
           </TouchableOpacity>
         </View>
@@ -167,6 +184,7 @@ RecipeDetailScreen.propTypes = {
   route: PropTypes.shape({
     params: PropTypes.shape({
       recipe: PropTypes.object.isRequired,
+      isUserRecipe: PropTypes.bool.isRequired,
     }).isRequired,
   }).isRequired,
   navigation: PropTypes.object.isRequired,
@@ -175,133 +193,133 @@ RecipeDetailScreen.propTypes = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: "#F8F9FA",
   },
   loaderContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   errorText: {
     fontSize: 18,
-    color: '#FF6B6B',
-    textAlign: 'center',
+    color: "#FF6B6B",
+    textAlign: "center",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#2D3436',
+    fontWeight: "700",
+    color: "#2D3436",
     flex: 1,
   },
   imageContainer: {
-    width: '100%',
+    width: "100%",
     height: 250,
-    backgroundColor: '#FF6B6B',
+    backgroundColor: "#FF6B6B",
   },
   image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
   contentContainer: {
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     marginTop: -20,
   },
   infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 24,
   },
   infoItem: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     padding: 12,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: "#F8F9FA",
     borderRadius: 12,
     marginHorizontal: 6,
   },
   infoLabel: {
     fontSize: 12,
-    color: '#636E72',
+    color: "#636E72",
     marginBottom: 4,
   },
   infoValue: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#2D3436',
+    fontWeight: "600",
+    color: "#2D3436",
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#2D3436',
+    fontWeight: "700",
+    color: "#2D3436",
     marginTop: 24,
     marginBottom: 16,
   },
   ingredientsContainer: {
-    backgroundColor: '#F8F9FA',
+    backgroundColor: "#F8F9FA",
     borderRadius: 12,
     padding: 16,
   },
   ingredientItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
   },
   ingredientDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#FF6B6B',
+    backgroundColor: "#FF6B6B",
     marginRight: 12,
   },
   ingredientText: {
     fontSize: 16,
-    color: '#2D3436',
+    color: "#2D3436",
     flex: 1,
   },
   instructions: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#2D3436',
-    textAlign: 'justify',
+    color: "#2D3436",
+    textAlign: "justify",
   },
   youtubeContainer: {
     marginTop: 16,
     marginBottom: 32,
-    alignItems: 'center',
+    alignItems: "center",
   },
   youtubeButton: {
-    backgroundColor: '#FF0000',
+    backgroundColor: "#FF0000",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 12,
   },
   youtubeButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   favoriteButton: {
-    backgroundColor: '#FF6B6B',
+    backgroundColor: "#FF6B6B",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 16,
   },
   favoriteButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

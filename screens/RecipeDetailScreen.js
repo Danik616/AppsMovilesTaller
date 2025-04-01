@@ -11,11 +11,13 @@ import {
   Linking,
 } from "react-native";
 import PropTypes from "prop-types";
+import { database, ref as dbRef, push } from "../firebase";
 
 export default function RecipeDetailScreen({ route, navigation }) {
   const { recipe, isUserRecipe } = route.params;
   const [recipeDetails, setRecipeDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Function to get recipe details by ID from API
   const fetchRecipeDetails = async (idMeal) => {
@@ -106,7 +108,19 @@ export default function RecipeDetailScreen({ route, navigation }) {
       strMealThumb: recipeDetails.strMealThumb || " ",
     };
 
-    push(dbRef(database, "/favorites"), newFavorite);
+    // Push the new favorite to the database
+    push(dbRef(database, "/favorites"), newFavorite)
+      .then(() => {
+        setIsSubmitting(false); // Reset submission state
+
+        // Navigate to 'CategoryDetail' screen with necessary data
+        navigation.goBack();
+        navigation.goBack();
+      })
+      .catch((error) => {
+        console.error("Error al agregar a favoritos:", error);
+        setIsSubmitting(false); // Reset submission state even if there's an error
+      });
   };
 
   return (
@@ -171,6 +185,7 @@ export default function RecipeDetailScreen({ route, navigation }) {
           <TouchableOpacity
             style={styles.favoriteButton}
             onPress={handleNewFavorite}
+            disabled={isSubmitting} // Keep the button disabled during submission
           >
             <Text style={styles.favoriteButtonText}>Agregar a Favoritos</Text>
           </TouchableOpacity>

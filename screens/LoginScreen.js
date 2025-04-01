@@ -21,6 +21,7 @@ import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
 } from 'firebase/auth';
+import { Eye, EyeOff } from 'lucide-react-native'; // Asumiendo que tienes lucide-react-native instalado
 
 const windowWidth = Dimensions.get('window').width;
 
@@ -31,6 +32,7 @@ export default function LoginScreen({ navigation }) {
   const [initializing, setInitializing] = useState(true);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const auth = getAuth();
@@ -89,7 +91,6 @@ export default function LoginScreen({ navigation }) {
       .then((userCredential) => {
         // Signed in
         const user = userCredential.user;
-        
         navigation.navigate('Home');
       })
       .catch((error) => {
@@ -120,7 +121,7 @@ export default function LoginScreen({ navigation }) {
   if (initializing) {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size='large' color='#1976d2' />
+        <ActivityIndicator size='large' color='#FF6B6B' />
         <Text style={styles.loadingText}>Cargando...</Text>
       </View>
     );
@@ -158,6 +159,8 @@ export default function LoginScreen({ navigation }) {
                 keyboardType='email-address'
                 autoCapitalize='none'
                 placeholderTextColor='#A0A0A0'
+                returnKeyType='next'
+                autoComplete='email'
               />
               {emailError ? (
                 <Text style={styles.errorText}>{emailError}</Text>
@@ -166,23 +169,42 @@ export default function LoginScreen({ navigation }) {
 
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Contraseña</Text>
-              <TextInput
-                placeholder='Ingresa tu contraseña'
-                value={password}
-                onChangeText={(text) => {
-                  setPassword(text);
-                  if (passwordError) validatePassword(text);
-                }}
-                secureTextEntry
-                style={styles.input}
-                placeholderTextColor='#A0A0A0'
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  placeholder='Ingresa tu contraseña'
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    if (passwordError) validatePassword(text);
+                  }}
+                  secureTextEntry={!showPassword}
+                  style={styles.passwordInput}
+                  placeholderTextColor='#A0A0A0'
+                  returnKeyType='done'
+                  autoComplete='password'
+                />
+                <TouchableOpacity
+                  style={styles.eyeIcon}
+                  onPress={() => setShowPassword(!showPassword)}
+                  activeOpacity={0.7}
+                >
+                  {showPassword ? (
+                    <EyeOff size={20} color='#636E72' />
+                  ) : (
+                    <Eye size={20} color='#636E72' />
+                  )}
+                </TouchableOpacity>
+              </View>
               {passwordError ? (
                 <Text style={styles.errorText}>{passwordError}</Text>
               ) : null}
             </View>
 
-            <TouchableOpacity style={styles.forgotPassword}>
+            <TouchableOpacity
+              style={styles.forgotPassword}
+              onPress={() => navigation.navigate('Forgot Password')}
+              activeOpacity={0.7}
+            >
               <Text style={styles.forgotPasswordText}>
                 ¿Olvidaste tu contraseña?
               </Text>
@@ -192,9 +214,10 @@ export default function LoginScreen({ navigation }) {
               style={styles.button}
               onPress={handleLogin}
               disabled={isLoading}
+              activeOpacity={0.8}
             >
               {isLoading ? (
-                <Text style={styles.buttonText}>Cargando...</Text>
+                <ActivityIndicator size='small' color='#FFFFFF' />
               ) : (
                 <Text style={styles.buttonText}>Iniciar sesión</Text>
               )}
@@ -209,8 +232,8 @@ export default function LoginScreen({ navigation }) {
             <View style={styles.signupContainer}>
               <Text style={styles.signupText}>¿No tienes cuenta? </Text>
               <TouchableOpacity
-                style={styles.registerButton}
                 onPress={() => navigation.navigate('Register')}
+                activeOpacity={0.7}
               >
                 <Text style={styles.signupLink}>Regístrate</Text>
               </TouchableOpacity>
@@ -239,6 +262,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 40,
     paddingBottom: 24,
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#636E72',
   },
   headerContainer: {
     alignItems: 'center',
@@ -298,6 +330,33 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E9ECEF',
   },
+  passwordContainer: {
+    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  passwordInput: {
+    flex: 1,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: '#2D3436',
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 16,
+    height: '100%',
+    justifyContent: 'center',
+  },
+  errorText: {
+    color: '#FF6B6B',
+    fontSize: 12,
+    marginTop: 4,
+  },
   forgotPassword: {
     alignSelf: 'flex-end',
     marginBottom: 24,
@@ -342,18 +401,18 @@ const styles = StyleSheet.create({
     color: '#636E72',
     fontSize: 14,
   },
-  registerButton: {
-    height: 56,
-    borderRadius: 12,
+  signupContainer: {
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E9ECEF',
-    backgroundColor: '#FFFFFF',
   },
-  registerButtonText: {
-    fontSize: 16,
+  signupText: {
+    fontSize: 14,
+    color: '#636E72',
+  },
+  signupLink: {
+    fontSize: 14,
+    color: '#FF6B6B',
     fontWeight: '600',
-    color: '#2D3436',
   },
 });

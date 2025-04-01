@@ -1,10 +1,10 @@
 import { NavigationContainer } from '@react-navigation/native';
-import { useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { StyleSheet, SafeAreaView, StatusBar } from 'react-native';
 import LoginScreen from './screens/LoginScreen';
 import MainNavigator from './screens/navigation/MainNavigation';
 import RegisterScreen from './screens/RegisterScreen';
+import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
 
 const Stack = createStackNavigator();
 
@@ -22,6 +22,11 @@ export default function App() {
           <Stack.Screen
             name='Register'
             component={RegisterScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name='Forgot Password'
+            component={ForgotPasswordScreen}
             options={{ headerShown: false }}
           />
           <Stack.Screen name='Main'>
